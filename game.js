@@ -2,6 +2,7 @@ var canvas = document.getElementById('gamewindow'),
     ctx = canvas.getContext('2d');
 const GRID = 32;
 const GRID_SQUARE = [GRID,GRID];
+const GRID_CENTER = [Math.floor(GRID/2),Math.floor(GRID/2)]
 const SPRITE_PAGES={
 	0:makeImageObj('spriteSheet32.png')
 }
@@ -14,12 +15,12 @@ const SPRITE_DATA = {
 	*/
 		player_idle: new ImgRef(
 			0,
-			gridScale(1,2),
-			[gridScale(1,0),gridScale(2,0),gridScale(3,0),gridScale(4,0)]
+			gridScale(1,1),
+			[gridScale(1,1),gridScale(2,1),gridScale(3,1),gridScale(4,1)]
 			),
 		player_jump: new ImgRef(
 			0,
-			gridScale(1,2),
+			gridScale(1,1),
 			[gridScale(5,0)]
 			),
 		enemy_walk: new ImgRef(
@@ -49,30 +50,39 @@ function gridScale(x,y,scale=GRID){
 }
 
 class Sprite{
-	constructor(spriteName, frameNum = 0){
+	constructor(spriteName, offsetX = 0, offsetY = 0, frameNum = 0){
 		this.imgRef = SPRITE_DATA[spriteName];
 		this.frameNum = frameNum;
+		this.offset = [offsetX,offsetY];
 	}
-	draw(x,y){
-		//ctx.save()
-		//ctx.translate(x+GRID,0);
-		//ctx.scale(-1,1);
-		//x=0
-		ctx.drawImage(
-			SPRITE_PAGES[this.imgRef.page],
-			...this.imgRef.coord[this.frameNum],
-			...this.imgRef.size,
-			x,
-			y,
-			...this.imgRef.size
-			);
-		//ctx.restore()
+	scale_sprite(x,y,scaleX = 1,scaleY = 1){	
+		ctx.translate(x,y);
+		ctx.scale(scaleX,scaleY);
+	}
+	rotate_sprite(x,y,angle){
+		ctx.translate(x,y);
+		ctx.rotate(angle);
 	}
 	
+	draw(x,y){
+		x -= this.offset[0];
+		y -= this.offset[1];
+		ctx.drawImage(
+			SPRITE_PAGES[this.imgRef.page],
+			this.imgRef.coord[this.frameNum][0],
+			this.imgRef.coord[this.frameNum][1],
+			this.imgRef.size[0],
+			this.imgRef.size[1],
+			x,
+			y,
+			this.imgRef.size[0],
+			this.imgRef.size[1]
+		);
+	}
 }
 class Animated_Sprite extends Sprite{
-	constructor(spriteName,speed = 10,frameNum = 0){
-		super(spriteName,frameNum);
+	constructor(spriteName,offsetX=16,offsetY=16,speed = 10,frameNum = 0){
+		super(spriteName,offsetX,offsetY,frameNum);
 		this.time = 0;
 		this.speed = speed;
 		this.maxFrame = this.imgRef.coord.length;
@@ -87,7 +97,7 @@ class Animated_Sprite extends Sprite{
 	
 var test = new Animated_Sprite('player_idle');
 var test2= new Animated_Sprite('enemy_walk');
-	
+var angle  = 0;
 	
 	
 
@@ -99,8 +109,12 @@ class GameControl{
 	  test2.update();
   }
   draw(){
-	  test.draw(50,50)
-	  test2.draw(100,82)
+	  ctx.save()
+	  test.rotate_sprite(200,300,angle*(Math.PI/180))
+	  test.draw(0,0)
+	  ctx.restore()
+	 
+	  test2.draw(300,300)
   }
 }
 
@@ -109,6 +123,7 @@ requestAnimationFrame(mainloop)
 ctx.clearRect(0,0,canvas.width,canvas.height)
 GAME.update();
 GAME.draw();
+angle = (angle+2)%360
 }
 var GAME = new GameControl()
 mainloop()
