@@ -55,15 +55,28 @@ class Sprite{
 		this.frameNum = frameNum;
 		this.offset = [offsetX,offsetY];
 	}
-	scale_sprite(x,y,scaleX = 1,scaleY = 1){	
+	draw_scale(x,y,scaleX,scaleY){	
+		ctx.save();
 		ctx.translate(x,y);
 		ctx.scale(scaleX,scaleY);
+		this.draw(0,0);
+		ctx.restore();
 	}
-	rotate_sprite(x,y,angle){
+	draw_rotate(x,y,angle){
+		ctx.save();
 		ctx.translate(x,y);
 		ctx.rotate(angle);
+		this.draw(0,0);
+		ctx.restore();
 	}
-	
+	draw_transform(x,y,scaleX,scaleY,angle){
+		ctx.save();
+		ctx.translate(x,y);
+		ctx.rotate(angle);
+		ctx.scale(scaleX,scaleY);
+		this.draw(0,0);
+		ctx.restore();
+	}
 	draw(x,y){
 		x -= this.offset[0];
 		y -= this.offset[1];
@@ -109,12 +122,10 @@ class GameControl{
 	  test2.update();
   }
   draw(){
-	  ctx.save()
-	  test.rotate_sprite(200,300,angle*(Math.PI/180))
-	  test.draw(0,0)
-	  ctx.restore()
-	 
-	  test2.draw(300,300)
+	  //test.draw_transform(200,300,2,2,angle*(Math.PI/180))
+	//test.draw_scale(200,300,2,2)
+	test.draw_rotate(200,300,angle*(Math.PI/180))
+	test2.draw(300,300)
   }
 }
 
